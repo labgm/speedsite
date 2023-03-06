@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block modethema %}light{% endblock %}
+{% block itensmenu %}
+<li class="nav-item">
+    <a class="nav-link" href="#">
+        <span data-feather="layers" class="align-text-bottom"></span>
+        Example
+    </a>
+</li>
+{% endblock %}
+
+{% block main %}
+{% comment %} <ul class="nav nav-pills nav-fill gap-2 p-1 small bg-primary rounded-5 shadow-sm" id="pillNav2" role="tablist" style="--bs-nav-link-color: var(--bs-white); --bs-nav-pills-link-active-color: var(--bs-primary); --bs-nav-pills-link-active-bg: var(--bs-white);">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active rounded-5" id="home-tab2" data-bs-toggle="tab" type="button" role="tab" aria-selected="true">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link rounded-5" id="profile-tab2" data-bs-toggle="tab" type="button" role="tab" aria-selected="false">Profile</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link rounded-5" id="contact-tab2" data-bs-toggle="tab" type="button" role="tab" aria-selected="false">Contact</button>
+  </li>
+</ul> {% endcomment %}
+<h1>Data Processament</h1>
+  {% if message != None %}
+    <div class="alert alert-primary" role="alert">
+      {{ message }}
+    </div>
+  {% endif %}
+  <div class="alert alert-primary" role="alert">
+    {{ dir }}
+  </div>
+  <div id="process-status">
+    <!-- saída será exibida aqui -->
+  </div>
+  <div style="max-width: 100%; overflow: scroll; display: grid;">
+      <div class="row">
+        <p>Lista de Arquivos</p>
+      </div>
+  </div>
+  <div class="d-grid gap-2 col-3 mx-auto">
+    <button class="btn btn-primary" type="button" onclick="sendFile()">Start</button>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    function sendFile(){
+      window.location='{% url 'runSnakemake' %}?dirproject={{dirproject}}'
+      // inicia a atualização do status do processo
+      updateStatus();
+    }
+    // função que atualiza a exibição do status do processo
+    function updateStatus() {
+      $.get('/get_process_status/', function(data) {
+        $('#process-status').text(data.status);
+        setTimeout(updateStatus, 1000);  // faz a solicitação a cada segundo
+      });
+    }
+  </script>
+{% endblock %}

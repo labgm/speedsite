@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block modethema %}light{% endblock %}
+{% block itensmenu %}
+<li class="nav-item">
+    <a class="nav-link" href="#">
+        <span data-feather="layers" class="align-text-bottom"></span>
+        Example
+    </a>
+</li>
+{% endblock %}
+
+{% block main %}
+<h1>Data Output</h1>
+  {% if message != None %}
+    <div class="alert alert-primary" role="alert">
+      {{ message }}
+    </div>
+  {% endif %}
+  <br>
+  <p>{{ output }}</p>
+{% endblock %}
