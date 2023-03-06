@@ -124,11 +124,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    # Insira aqui o caminho para a pasta raiz dos arquivos estáticos da sua aplicação 'index'
-    os.path.join(BASE_DIR, 'apps/index/static'),
-]
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
