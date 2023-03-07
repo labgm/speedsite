@@ -11,13 +11,25 @@
 {% endblock %}
 
 {% block main %}
-<h1>Data Output</h1>
-  {% if message != None %}
-    <div class="alert alert-primary" role="alert">
-      {{ message }}
-    </div>
-  {% endif %}
+  <h1>Data Output</h1>
+    {% if message != None %}
+      <div class="alert alert-primary" role="alert">
+        {{ message }}
+      </div>
+    {% endif %}
   <br>
+  <h5>Download Output Files</h5>
+  <hr>
+  <div class="btn-group" role="group" aria-label="Basic example">
+    <button type="button" class="btn btn-primary">FastQC</button>
+    <button type="button" class="btn btn-primary">Trimmomatic</button>
+    <button type="button" class="btn btn-primary">MegaHit</button>
+    <button type="button" class="btn btn-primary">Prokka</button>
+    <button type="button" class="btn btn-primary">Kraken</button>
+    <button type="button" class="btn btn-primary">Maxbin</button>
+  </div>
+  <hr>
+  <span>Output</span>
   <div>
     <textarea id="output" readonly rows="10" cols="100" style="width: 100%; overflow:auto;">{{ output }}</textarea>
   </div>

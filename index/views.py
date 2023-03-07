@@ -52,6 +52,9 @@ def upload(request):
         message = 'Faça o upload dos arquivos'
         return render(request, 'index.html', {'form': form, 'message': message})
 
+def output_snakemake(request):
+    return render(request, 'snakemake_output.html')
+
 def processament(request):
     # Iniciando um processo usando a função Popen
     processo = subprocess.Popen(["ping", "200.239.92.130", "-c", "30"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

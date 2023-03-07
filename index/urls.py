@@ -9,5 +9,5 @@ urlpatterns = [
     path('processament', views.processament, name='processament'),
     path('runSnakemake', views.run_snakemake, name='runSnakemake'),
     path('get_process_status/', views.get_process_status, name='get_process_status'),
-
+    path('output_snakemake/', views.output_snakemake, name='output_snakemake'),
 ]
