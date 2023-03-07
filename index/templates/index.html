@@ -34,12 +34,16 @@
     {{ dir }}
 </div> {% endcomment %}
 {% comment %} <div id="progress-bar"></div> {% endcomment %}
-<div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+<div class="progress" id="progress" style="display: none;"  role="progressbar" aria-label="Animated striped example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
   <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress-bar" style="width: 0%"></div>
 </div>
- <div id="process-status">
+<div id="process-status">
     <!-- saída será exibida aqui -->
-  </div>
+</div>
+<br>
+<div>
+  <textarea id="output" style="display: none;" readonly rows="10" cols="100" style="width: 100%; overflow:auto;"></textarea>
+</div>
 <form class="row g-3" id="upload-form" action="{% url 'upload' %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="col-md-6">
@@ -77,7 +81,8 @@ $(document).ready(function() {
       xhr: function() {
         // criar um objeto XMLHttpRequest com suporte a upload de arquivo
         var xhr = new XMLHttpRequest();
-        $('#progress-bar').show();
+        $('#progress').show();
+        $('#process-status').html('Sending files...');
         xhr.upload.addEventListener('progress', function(event) {
           if (event.lengthComputable) {
             // calcular a porcentagem concluída
@@ -85,6 +90,9 @@ $(document).ready(function() {
             // atualizar a barra de progresso com a porcentagem concluída
             $('#progress-bar').css('width', percentComplete + '%');
             $('#progress-bar').html(percentComplete + '%');
+            if(percentComplete == 100){
+              updateStatus();
+            }
           }
         }, false);
         return xhr;
@@ -92,8 +100,10 @@ $(document).ready(function() {
       success: function(data) {
         // exibir uma mensagem de sucesso e limpar a barra de progresso
         $('#message').html(data.message);
-        updateStatus();
-        window.location.replace("/runSnakemake?dirproject=" + data.dirproject);
+        $('#progress').hide();
+        $('#upload-form').hide();
+        $('#output').show();
+        window.location.replace("/runSnakemake?dirproject=" + data.dirproject + "&id=" + data.id);
       },
       error: function(xhr, status, error) {
         // exibir uma mensagem de erro e limpar a barra de progresso
@@ -106,66 +116,13 @@ $(document).ready(function() {
 // função que atualiza a exibição do status do processo
 function updateStatus() {
   $.get('/get_process_status/', function(data) {
-    $('#process-status').text(data.status);
+    $('#output').show();
+    $('#output').text(data.status);
+    $('#process-status').html(data.statusUpload);
+    $('#progress-bar').css('width', data.filePercent + '%');
+    $('#progress-bar').html(data.filePercent + '%');
     setTimeout(updateStatus, 1000);  // faz a solicitação a cada segundo
   });
 }
-{% comment %} $(document).ready(function() {
-  $('#upload-form').submit(function(event) {
-    // evitar que o formulário seja enviado tradicionalmente
-    event.preventDefault();
-    var formData = new FormData(this);
-    // enviar o formulário usando AJAX
-    $.ajax({
-      url: $(this).attr('action'),
-      type: $(this).attr('method'),
-      data: new FormData(this),
-      cache: false,
-      contentType: false,
-      processData: false,
-      xhr: function() {
-        // criar um objeto XMLHttpRequest com suporte a upload de arquivo
-        var xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener('progress', function(event) {
-          if (event.lengthComputable) {
-            // calcular a porcentagem concluída
-            var percentComplete = Math.round((event.loaded / event.total) * 100);
-            // atualizar a barra de progresso com a porcentagem concluída
-            $('#progress-bar').html('Enviando arquivo: ' + percentComplete + '%');
-          }
-        }, false);
-          return xhr;
-      },
-      success: function(data) {
-        // exibir uma mensagem de sucesso e limpar a barra de progresso
-        $('#progress-bar').html('Arquivo enviado com sucesso!');
-      },
-      error: function(xhr, status, error) {
-        // exibir uma mensagem de erro e limpar a barra de progresso
-        $('#progress-bar').html('Ocorreu um erro ao enviar o arquivo.');
-      }
-    });
-  });
-}); {% endcomment %}
-{% comment %} $(document).ready(function() {
-  $('#upload-form').ajaxForm({
-    beforeSend: function() {
-      // exibir a barra de progresso
-      $('#progress-bar').html('Enviando arquivo...');
-    },
-    uploadProgress: function(event, position, total, percentComplete) {
-      // atualizar a barra de progresso com a porcentagem concluída
-      $('#progress-bar').html('Enviando arquivo: ' + percentComplete + '%');
-    },
-    success: function(data) {
-      // exibir uma mensagem de sucesso e limpar a barra de progresso
-      $('#progress-bar').html('Arquivo enviado com sucesso!');
-    },
-    error: function(xhr, status, error) {
-      // exibir uma mensagem de erro e limpar a barra de progresso
-      $('#progress-bar').html('Ocorreu um erro ao enviar o arquivo.');
-    }
-  });
-}); {% endcomment %}
 </script>
 {% endblock %}

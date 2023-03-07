@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block style %}
+  <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.2/dist/terminal.min.css" />
+{% endblock %}
 {% block modethema %}light{% endblock %}
 {% block itensmenu %}
 <li class="nav-item">
@@ -29,10 +32,17 @@
     </div>
   {% endif %}
   <div class="alert alert-primary" role="alert">
-    {{ dir }}
+      {{ pid }}
+  </div>
+  <div class="alert alert-primary" role="alert">
+    {{ saida }}
   </div>
   <div id="process-status">
     <!-- saída será exibida aqui -->
+  </div>
+  <h5 class="terminal-prompt">Output</h5>
+  <div>
+    <textarea id="output" readonly rows="10" cols="100" style="width: 100%; overflow:auto;"></textarea>
   </div>
   <div style="max-width: 100%; overflow: scroll; display: grid;">
       <div class="row">
@@ -44,6 +54,7 @@
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
+  updateStatus();
     function sendFile(){
       window.location='{% url 'runSnakemake' %}?dirproject={{dirproject}}'
       // inicia a atualização do status do processo
@@ -52,7 +63,9 @@
     // função que atualiza a exibição do status do processo
     function updateStatus() {
       $.get('/get_process_status/', function(data) {
-        $('#process-status').text(data.status);
+        outputBox = $('#output');
+        outputBox.text(data.status);
+        outputBox.scrollTop(outputBox[0].scrollHeight - outputBox.height());
         setTimeout(updateStatus, 1000);  // faz a solicitação a cada segundo
       });
     }

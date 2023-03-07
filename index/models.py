@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 # Create your models here.
 class User(models.Model):
@@ -15,3 +16,8 @@ class Project(models.Model):
             'Criado em', auto_now_add=True
         )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class Process(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.IntegerField()
+    status = models.CharField(max_length=200)
