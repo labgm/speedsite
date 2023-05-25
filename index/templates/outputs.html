@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block modethema %}light{% endblock %}
+{% block itensmenu %}
+{% endblock %}
+
+{% block main %}
+  <h1>Data Outputs</h1>
+    {% if message != None %}
+      <div class="alert alert-primary" role="alert">
+        {{ message }}
+      </div>
+    {% endif %}
+  <br><br>
+  {% comment %} {% for chave, valor in data.items %}
+      <li>{{ chave }}: {{ valor }}</li>
+  {% endfor %} {% endcomment %}
+  {{samples}}
+  <h3>Samples</h3>
+  <div class="accordion" id="accordionPanelsStayOpenExample">
+  {% for sample, sample_data in data.items %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="{{ sample }}-headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{{ sample }}-collapseOne" aria-expanded="true" aria-controls="{{ sample }}-collapseOne">
+          Sample {{ sample }}
+        </button>
+      </h2>
+      <div id="{{ sample }}-collapseOne" class="accordion-collapse collapse" aria-labelledby="{{ sample }}-headingOne">
+        <div class="accordion-body">
+          <div class="d-flex align-items-start">
+            <div class="nav flex-column nav-pills me-3" id="{{ sample }}-v-pills-tab" role="tablist" aria-orientation="vertical">
+              <button class="nav-link active" id="{{ sample }}-v-pills-quality-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-quality" type="button" role="tab" aria-controls="{{ sample }}-v-pills-quality" aria-selected="true">Quality Control</button>
+              <button class="nav-link" id="{{ sample }}-v-pills-assembly-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-assembly" type="button" role="tab" aria-controls="{{ sample }}-v-pills-assembly" aria-selected="false">Assemby</button>
+              <button class="nav-link" id="{{ sample }}-v-pills-taxonomic-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-taxonomic" type="button" role="tab" aria-controls="{{ sample }}-v-pills-taxonomic" aria-selected="false">Taxonomic Analysis</button>
+              <button class="nav-link" id="{{ sample }}-v-pills-functional-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-functional" type="button" role="tab" aria-controls="{{ sample }}-v-pills-functional" aria-selected="false">Functional Analysis</button>
+              <button class="nav-link" id="{{ sample }}-v-pills-resistance-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-resistance" type="button" role="tab" aria-controls="{{ sample }}-v-pills-resistance" aria-selected="false">AMR Analysis</button>
+              <button class="nav-link" id="{{ sample }}-v-pills-comparative-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-comparative" type="button" role="tab" aria-controls="{{ sample }}-v-pills-comparative" aria-selected="false">Comparative Analysis</button>
+            </div>
+            <div class="tab-content" id="v-pills-tabContent">
+              <div class="tab-pane fade show active" id="{{ sample }}-v-pills-quality" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-quality-tab">
+                <div class="container-fluid">
+                  <h3>Quality Control and Preprocessing</h3>
+                  <hr>
+                  <div class="row">
+                    <div class="col-3">
+                      {{ sample_data.conteudo_div_summary_foward|safe }}
+                    </div>
+                    <div class="col-9">
+                      {{ sample_data.conteudo_div_main_foward|safe }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="{{ sample }}-v-pills-assembly" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-assembly-tab">
+                <h3>Assembly</h3>
+                <hr>
+              </div>
+              <div class="tab-pane fade" id="{{ sample }}-v-pills-taxonomic" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-taxonomic-tab">
+                <div class="container">
+                  <h3>Taxonomic Analisys</h3>
+                  <hr>
+                  <div class="row">
+                    <div class="col">
+                      <iframe srcdoc="{{ sample_data.html_kraken_report }}" width="920" height="700"></iframe>
+                    </div>
+                  </div>
+                </div>              
+              </div>
+              <div class="tab-pane fade" id="{{ sample }}-v-pills-functional" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-functional-tab">
+                <h3>Functional Analisys</h3>
+                <hr>
+              </div>
+              <div class="tab-pane fade" id="{{ sample }}-v-pills-resistance" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-resistance-tab">
+                <h3>5. AMR Analisys</h3>
+                <hr>
+              </div>
+              <div class="tab-pane fade" id="{{ sample }}-v-pills-comparative" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-comparative-tab">
+                <h3>6. Comparative Analisys</h3>
+                <hr>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+  <!-- Incorporar o gráfico usando a tag json_script -->
+  {{ chart_html|safe }} <!-- Renderiza o HTML do gráfico -->
+  {% comment %} <div id="grafico_qualidade"></div>
+    {% json_script grafico_qualidade 'grafico_qualidade' %} {% endcomment %}
+
+{% endblock %}
+{% block script%}
+<script src="https://cdn.jsdelivr.net/npm/vega@5.25.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5.25.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6.18.2"></script>
+{% endblock %}

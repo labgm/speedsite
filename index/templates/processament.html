@@ -1,16 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block style %}
-  <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.2/dist/terminal.min.css" />
+  {% comment %} <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.2/dist/terminal.min.css" /> {% endcomment %}
 {% endblock %}
 {% block modethema %}light{% endblock %}
 {% block itensmenu %}
-<li class="nav-item">
-    <a class="nav-link" href="#">
-        <span data-feather="layers" class="align-text-bottom"></span>
-        Example
-    </a>
-</li>
+
 {% endblock %}
 
 {% block main %}
@@ -25,49 +20,115 @@
     <button class="nav-link rounded-5" id="contact-tab2" data-bs-toggle="tab" type="button" role="tab" aria-selected="false">Contact</button>
   </li>
 </ul> {% endcomment %}
-<h1>Data Processament</h1>
+<style>
+{% comment %} #tableStatus, table {
+  border-radius: 100px;
+} {% endcomment %}
+#tableStatus, table th {
+  border-radius: 10px 10px 0px 0px ;
+}
+
+
+
+
+</style>
+<h1>Processing</h1>
+<br>
   {% if message != None %}
-    <div class="alert alert-primary" role="alert">
+    <div class="alert alert-danger" role="alert">
       {{ message }}
     </div>
   {% endif %}
-  <div class="alert alert-primary" role="alert">
-      {{ pid }}
-  </div>
-  <div class="alert alert-primary" role="alert">
-    {{ saida }}
-  </div>
-  <div id="process-status">
-    <!-- saída será exibida aqui -->
-  </div>
-  <h5 class="terminal-prompt">Output</h5>
-  <div>
-    <textarea id="output" readonly rows="10" cols="100" style="width: 100%; overflow:auto;"></textarea>
-  </div>
-  <div style="max-width: 100%; overflow: scroll; display: grid;">
-      <div class="row">
-        <p>Lista de Arquivos</p>
+
+  {% if id != None %}
+    <div class="container">
+      <div class="row justify-content-md-center">
+        <div class="col-lg-7 table-responsive">
+          <table id="tableStatus" class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th> ID PROJECT </th>
+                    <th> STATUS </th>
+                    <th> STEPS </th>
+                    <th> RESULTS </th>
+                </tr>
+            </thead>
+            <tbody id='file-list'>
+              <tr>
+                <td class="align-middle text-center"> {{ id }} </td>
+                <td class="align-middle text-center"> 
+                  {{ project.status }} 
+                </td>
+                <td class="align-middle text-center"> {{ project.position }} </td>
+                <td class="align-middle text-center"> 
+                  {% if project.status == 'Done' %}
+                    <button id="btnResult" type="button" class="btn btn-success"><i class="fas fa-file"></i> View </button>
+                  {% endif %}
+                  {% if project.status == 'Erro' %}
+                    <button id="btnErro" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#erroModal"><i class="fas fa-exclamation-triangle"></i> View </button>
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+    </div>
+  {% else %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-auto">
+          <div class="input-group mb-3">
+            <input type="text" id="search-by-id" class="form-control" placeholder="Search by ID" aria-label="Search by ID" aria-describedby="search-by-id">
+            <button class="btn btn-outline-secondary" type="button" id="button-search-by-id">Search</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+<!-- Button trigger modal -->
+
+<!-- Modal -->
+<div class="modal fade" id="erroModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Error Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p> {{ project.output|linebreaks}} </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">X</button>
+      </div>
+    </div>
   </div>
-  <div class="d-grid gap-2 col-3 mx-auto">
-    <button class="btn btn-primary" type="button" onclick="sendFile()">Start</button>
-  </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-  updateStatus();
-    function sendFile(){
-      window.location='{% url 'runSnakemake' %}?dirproject={{dirproject}}'
-      // inicia a atualização do status do processo
-      updateStatus();
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready( function () {
+    $('#tableStatus').DataTable({
+      paging: false, // Remove a paginação
+      searching: false, // Remove a busca
+      info: false, // Remove a exibição de informações
+      select: true,
+      ordering: false,
+      columnDefs: [
+        { width: '200px', targets: [0,1,2,3] }
+      ]
+    });
+  });
+  $('#button-search-by-id').click(function(){
+    var id = $('#search-by-id').val().trim();
+    if (id === "") {
+        $("#search-by-id").select();
+    } else {
+        $('#btn-search').hide();
+        $('#btn-search i').removeClass('fa-search').addClass('fa-spinner fa-spin');
+        window.location.replace("processament?id=" + id);
     }
-    // função que atualiza a exibição do status do processo
-    function updateStatus() {
-      $.get('/get_process_status/', function(data) {
-        outputBox = $('#output');
-        outputBox.text(data.status);
-        outputBox.scrollTop(outputBox[0].scrollHeight - outputBox.height());
-        setTimeout(updateStatus, 1000);  // faz a solicitação a cada segundo
-      });
-    }
-  </script>
+  });
+</script>
 {% endblock %}

@@ -2,37 +2,17 @@
 {% load static %}
 {% block modethema %}light{% endblock %}
 {% block itensmenu %}
-<li class="nav-item">
-    <a class="nav-link" href="#">
-        <span data-feather="layers" class="align-text-bottom"></span>
-        Example
-    </a>
-</li>
+
 {% endblock %}
 
 {% block main %}
-<h1>Data Upload</h1>
-{% comment %} {% if message != None %}
-  <div id="message" class="alert alert-primary" role="alert">
-    {{ message }}
-  </div>
-{% endif %}
-<div id="message" class="alert alert-primary" role="alert">
+<h1 id="page-title">Data Upload</h1>
+<div id="message" style="display: none;" class="alert alert-primary" role="alert">
 </div>
-<div class="alert alert-primary" role="alert">
-    {{ dir }}
-</div> {% endcomment %}
-{% comment %} <div id="progress-bar"></div> {% endcomment %}
 <div class="progress" id="progress" style="display: none;"  role="progressbar" aria-label="Animated striped example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
   <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress-bar" style="width: 0%"></div>
 </div>
-<div id="process-status">
-    <!-- saída será exibida aqui -->
-</div>
 <br>
-<div>
-  <textarea id="output" style="display: none;" readonly rows="10" cols="100" style="width: 100%; overflow:auto;"></textarea>
-</div>
 <form class="row g-3" id="upload-form" action="{% url 'upload' %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="col-md-6">
@@ -43,7 +23,6 @@
         <label for="inputEmail" class="form-label">{{ form.email.label }}</label>
         {{ form.email }}
     </div>
-
     <div class="col-md-6">
         <label for="inputFastq" class="form-label">{{ form.fileFastq.label }}</label>
         <div class="input-group col-12">
@@ -52,9 +31,23 @@
         </div>
     </div>
 </form>
+<br><hr id="row"><br>
+<table id="tableFile" class="display">
+    <thead>
+        <tr>
+            <th>File Loaded</th>
+        </tr>
+    </thead>
+    <tbody id='file-list'>
+    </tbody>
+</table>
+<br>
+<button id="btnTrack" type="button" class="btn btn-outline-secondary" style="display: none;" ><i class="fas fa-bolt"></i> Track Processing</button>
+
 {% endblock %}
 {% block script%}
 <script>
+var id = 0;
 $(document).ready(function() {
   $('#upload-form').submit(function(event) {
     // evitar que o formulário seja enviado tradicionalmente
@@ -80,7 +73,9 @@ $(document).ready(function() {
             $('#progress-bar').css('width', percentComplete + '%');
             $('#progress-bar').html(percentComplete + '%');
             if(percentComplete == 100){
-              updateStatus();
+              $('#process-status').hide();
+              $('#row').hide();
+              //updateStatus();
             }
           }
         }, false);
@@ -88,11 +83,28 @@ $(document).ready(function() {
       },
       success: function(data) {
         // exibir uma mensagem de sucesso e limpar a barra de progresso
-        $('#message').html(data.message);
+        $('#message').html(data.message).show();
+        $('#page-title').html('Data Processing').show();
         $('#progress').hide();
         $('#upload-form').hide();
-        $('#output').show();
-        window.location.replace("/runSnakemake?dirproject=" + data.dirproject + "&id=" + data.id);
+        $('#btnTrack').show();
+        var fileList = data.list_files;
+        var fileContainer = $('#file-list');
+        fileContainer.empty();
+        if (fileList.length > 0) {
+            var tbody = '';
+            fileList.forEach(function(file) {
+              tbody += '<tr><td>' + file + '</td></tr>';
+                {% comment %} tbody.append('<tr><td>' + '<i class="fas fa-file-archive" aria-hidden="true"></i>' + file + '</td></tr>'); {% endcomment %}
+            });
+            fileContainer.append(tbody);
+        } else {
+            fileContainer.text('Nenhum arquivo enviado.');
+        }
+        id = data.data_processament;
+
+        //COMANDO QUE INICIAVA A EXECUÇÃO DO SNAKEMAKE - FOI DESATIVADO PRO USUÁRIO RODAR SÓ DEPOIS
+        //window.location.replace("/runSnakemake?dirproject=" + data.dirproject + "&id=" + data.id);
       },
       error: function(xhr, status, error) {
         // exibir uma mensagem de erro e limpar a barra de progresso
@@ -101,9 +113,25 @@ $(document).ready(function() {
     });
   });
 });
+// CONFIGURAÇÃO DA TABELA DE ARQUIVOS ENVIADOS
+$(document).ready( function () {
+    $('#tableFile').DataTable({
+      paging: false, // Remove a paginação
+      searching: false, // Remove a busca
+      info: false, // Remove a exibição de informações
+      select: true,
+      ordering: false,
+    });
+} );
+
+// AÇÃO DO BOTÃO 
+$('#btnTrack').click(function(){
+  $('#btnTrack i').removeClass('fa-bolt').addClass('fa-spinner fa-spin');
+  window.location.replace("processament?id=" + id);
+});
 
 // função que atualiza a exibição do status do processo
-function updateStatus() {
+{% comment %} function updateStatus() {
   $.get('/get_process_status/', function(data) {
     $('#output').show();
     $('#output').text(data.status);
@@ -112,6 +140,6 @@ function updateStatus() {
     $('#progress-bar').html(data.filePercent + '%');
     setTimeout(updateStatus, 1000);  // faz a solicitação a cada segundo
   });
-}
+} {% endcomment %}
 </script>
 {% endblock %}

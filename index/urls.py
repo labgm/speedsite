@@ -7,7 +7,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('upload', views.upload, name='upload'),
     path('processament', views.processament, name='processament'),
-    path('runSnakemake', views.run_snakemake, name='runSnakemake'),
     path('get_process_status/', views.get_process_status, name='get_process_status'),
-    path('output_snakemake/', views.output_snakemake, name='output_snakemake'),
+    path('outputs/', views.outputs, name='outputs'),
+    path('download/', views.download_directory, name='download_directory'),
 ]
