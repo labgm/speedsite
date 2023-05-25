@@ -125,6 +125,7 @@ def outputs(request):
         samples.remove('comandos.sh')
     if 'microeco' in samples:
         samples.remove('microeco')
+    samples.sort()
     data = {}
 
     for sample in samples:
