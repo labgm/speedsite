@@ -26,57 +26,129 @@
       </h2>
       <div id="{{ sample }}-collapseOne" class="accordion-collapse collapse" aria-labelledby="{{ sample }}-headingOne">
         <div class="accordion-body">
-          <div class="d-flex align-items-start">
-            <div class="nav flex-column nav-pills me-3" id="{{ sample }}-v-pills-tab" role="tablist" aria-orientation="vertical">
-              <button class="nav-link active" id="{{ sample }}-v-pills-quality-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-quality" type="button" role="tab" aria-controls="{{ sample }}-v-pills-quality" aria-selected="true">Quality Control</button>
-              <button class="nav-link" id="{{ sample }}-v-pills-assembly-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-assembly" type="button" role="tab" aria-controls="{{ sample }}-v-pills-assembly" aria-selected="false">Assemby</button>
-              <button class="nav-link" id="{{ sample }}-v-pills-taxonomic-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-taxonomic" type="button" role="tab" aria-controls="{{ sample }}-v-pills-taxonomic" aria-selected="false">Taxonomic Analysis</button>
-              <button class="nav-link" id="{{ sample }}-v-pills-functional-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-functional" type="button" role="tab" aria-controls="{{ sample }}-v-pills-functional" aria-selected="false">Functional Analysis</button>
-              <button class="nav-link" id="{{ sample }}-v-pills-resistance-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-resistance" type="button" role="tab" aria-controls="{{ sample }}-v-pills-resistance" aria-selected="false">AMR Analysis</button>
-              <button class="nav-link" id="{{ sample }}-v-pills-comparative-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-v-pills-comparative" type="button" role="tab" aria-controls="{{ sample }}-v-pills-comparative" aria-selected="false">Comparative Analysis</button>
-            </div>
-            <div class="tab-content" id="v-pills-tabContent">
-              <div class="tab-pane fade show active" id="{{ sample }}-v-pills-quality" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-quality-tab">
-                <div class="container-fluid">
-                  <h3>Quality Control and Preprocessing</h3>
-                  <hr>
-                  <div class="row">
-                    <div class="col-3">
-                      {{ sample_data.conteudo_div_summary_foward|safe }}
+          <!-- BOTÕES DE SELEÇÃO -->
+          <ul class="nav nav-pills mb-3" id="{{ sample }}-pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="{{ sample }}-pills-quality-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-quality" type="button" role="tab" aria-controls="{{ sample }}-pills-quality" aria-selected="true">Quality Control</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="{{ sample }}pills-assembly-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-assembly" type="button" role="tab" aria-controls="{{ sample }}-pills-assembly" aria-selected="false">Assemby</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="{{ sample }}-pills-taxonomic-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-taxonomic" type="button" role="tab" aria-controls="{{ sample }}-pills-taxonomic" aria-selected="false">Taxonomic Analysis</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="{{ sample }}-pills-functional-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-functional" type="button" role="tab" aria-controls="{{ sample }}-pills-functional" aria-selected="false">Functional Analysis</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="{{ sample }}-pills-resistance-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-resistance" type="button" role="tab" aria-controls="{{ sample }}-pills-resistance" aria-selected="false">AMR Analysis</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="{{ sample }}-pills-comparative-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-comparative" type="button" role="tab" aria-controls="{{ sample }}-pills-comparative" aria-selected="false">Comparative Analysis</button>
+            </li>
+          </ul>
+          <!-- CONTEÚDO -->
+          <div class="tab-content" id="pills-tabContent">
+            <!-- CONTEÚDO DA QUALIDADE -->
+            <div class="tab-pane fade show active" id="{{ sample }}-pills-quality" role="tabpanel" aria-labelledby="{{ sample }}-pills-quality-tab">
+              <div class="container-fluid">
+                <h3>Quality Control and Preprocessing</h3>
+                <hr>
+                <ul class="nav nav-pills mb-3" id="{{ sample }}-pills-assembly-tab" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="{{ sample }}-pills-foward-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-foward" type="button" role="tab" aria-controls="{{ sample }}-pills-foward" aria-selected="true">Foward</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="{{ sample }}-pills-reverse-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-reverse" type="button" role="tab" aria-controls="{{ sample }}-pills-reverse" aria-selected="false">Reverse</button>
+                  </li>
+                </ul>
+                <div class="tab-content" id="{{ sample }}-pills-assembly-tabContent">
+                  <div class="tab-pane fade show active" id="{{ sample }}-pills-foward" role="tabpanel" aria-labelledby="{{ sample }}-pills-foward-tab">
+                    <div class="row">
+                      <div class="col-3">
+                        {{ sample_data.conteudo_div_summary_foward|safe }}
+                      </div>
+                      <div class="col-9">
+                        {{ sample_data.conteudo_div_main_foward|safe }}
+                      </div>
                     </div>
-                    <div class="col-9">
-                      {{ sample_data.conteudo_div_main_foward|safe }}
+                  </div>
+                  <div class="tab-pane fade" id="{{ sample }}-pills-reverse" role="tabpanel" aria-labelledby="{{ sample }}-pills-reverse-tab">
+                    <div class="row">
+                      <div class="col-3">
+                        {{ sample_data.conteudo_div_summary_reverse|safe }}
+                      </div>
+                      <div class="col-9">
+                        {{ sample_data.conteudo_div_main_reverse|safe }}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="tab-pane fade" id="{{ sample }}-v-pills-assembly" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-assembly-tab">
-                <h3>Assembly</h3>
-                <hr>
+            </div>
+            <!-- CONTEÚDO DA MONTAGEM -->
+            <div class="tab-pane fade" id="{{ sample }}-pills-assembly" role="tabpanel" aria-labelledby="{{ sample }}-pills-assembly-tab">
+              <div class="row">
+                <div>
+                  <iframe class="col-12" srcdoc="{{ sample_data.html_icarus }}" height="750"></iframe>
+                </div>
               </div>
-              <div class="tab-pane fade" id="{{ sample }}-v-pills-taxonomic" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-taxonomic-tab">
-                <div class="container">
-                  <h3>Taxonomic Analisys</h3>
-                  <hr>
+            </div>
+            <!-- CONTEÚDO DA TAXONOMIA -->
+            <div class="tab-pane fade" id="{{ sample }}-pills-taxonomic" role="tabpanel" aria-labelledby="{{ sample }}-pills-taxonomic-tab">
+              <div>
+                <iframe class="col-12" srcdoc="{{ sample_data.html_kraken_report }}" height="750"></iframe>
+              </div>
+            </div>
+            <!-- CONTEÚDO DA FUNÇÃO -->
+            <div class="tab-pane fade" id="{{ sample }}-pills-functional" role="tabpanel" aria-labelledby="{{ sample }}-pills-functional-tab">
+              <div class="row">
+                <div class="col">
+                  <iframe class="col-12" srcdoc="{{ sample_data.html_prokka }}" height="700"></iframe>
+                </div>
+              </div>
+            </div>
+            <!-- CONTEÚDO DA AMR -->
+            <div class="tab-pane fade" id="{{ sample }}-pills-resistance" role="tabpanel" aria-labelledby="{{ sample }}-pills-resistance-tab">
+              <ul class="nav nav-pills mb-3" id="{{ sample }}-pills-amr-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="{{ sample }}-pills-class-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-class" type="button" role="tab" aria-controls="{{ sample }}-pills-class" aria-selected="true">Class AMR</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="{{ sample }}-pills-gene-tab" data-bs-toggle="pill" data-bs-target="#{{ sample }}-pills-gene" type="button" role="tab" aria-controls="{{ sample }}-pills-gene" aria-selected="false">Reverse</button>
+                </li>
+              </ul>
+              <div class="tab-content" id="{{ sample }}-pills-amr-tabContent">
+                <!-- CONTEÚDO -->
+                <div class="tab-pane fade show active" id="{{ sample }}-pills-class" role="tabpanel" aria-labelledby="{{ sample }}-pills-class-tab">
                   <div class="row">
-                    <div class="col">
-                      <iframe srcdoc="{{ sample_data.html_kraken_report }}" width="920" height="700"></iframe>
+                    <div class="col-12">
+                      {{sample_data.html_amr_class|safe}}
+                      {% comment %} <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="col-12" srcdoc="{{sample_data.html_amr_class}}" ></iframe>
+                      </div> {% endcomment %}
                     </div>
                   </div>
-                </div>              
+                </div>
+                <div class="tab-pane fade" id="{{ sample }}-pills-gene" role="tabpanel" aria-labelledby="{{ sample }}-pills-gene-tab">
+                  <div class="row">
+                    <div class="col-12">
+                      {{sample_data.html_amr_gene|safe}}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="tab-pane fade" id="{{ sample }}-v-pills-functional" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-functional-tab">
-                <h3>Functional Analisys</h3>
-                <hr>
-              </div>
-              <div class="tab-pane fade" id="{{ sample }}-v-pills-resistance" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-resistance-tab">
-                <h3>5. AMR Analisys</h3>
-                <hr>
-              </div>
-              <div class="tab-pane fade" id="{{ sample }}-v-pills-comparative" role="tabpanel" aria-labelledby="{{ sample }}-v-pills-comparative-tab">
-                <h3>6. Comparative Analisys</h3>
-                <hr>
-              </div>
+              {% comment %} <div class="row">
+                <div class="col-6">
+                  <iframe class="col-md-auto" srcdoc="{{ sample_data.html_amr_class }}" height="700"></iframe>
+                </div>
+                <div class="col-6">
+                  <iframe class="col-12" srcdoc="{{ sample_data.html_amr_gene }}" height="700"></iframe>
+                </div>
+              </div> {% endcomment %}
+            </div>
+            <div class="tab-pane fade" id="{{ sample }}-pills-comparative" role="tabpanel" aria-labelledby="{{ sample }}-pills-comparative-tab">
+            
             </div>
           </div>
         </div>

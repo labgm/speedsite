@@ -70,6 +70,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'speedsite.wsgi.application'
 
+# Configuração do backend de e-mail (exemplo para SMTP)
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'mail.helptechsistemas.com.br'
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = 'noreply-speedypipe4meta@helptechsistemas.com.br'
+# EMAIL_HOST_PASSWORD = '@Noreply1'
+# EMAIL_USE_TLS = False  # ou False, dependendo das configurações do seu servidor de e-mail
+# DEFAULT_FROM_EMAIL = 'noreply-speedypipe4meta@helptechsistemas.com.br'
+
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
