@@ -179,17 +179,17 @@ def outputs(request):
         tsv_amr_mechanism = amr_mechanism_report.read().decode('utf-8')
         
         # -> tsv do Megares Class
-        amr_type_report = sftp.open(remote_amr_type, 'r')
-        tsv_amr_type = amr_type_report.read().decode('utf-8')
+        # amr_type_report = sftp.open(remote_amr_type, 'r')
+        # tsv_amr_type = amr_type_report.read().decode('utf-8')
 
         # -------------------------------------------------------------------------
         
         # PROCESSAMENTO E ORGANIZAÇÃO DOS DADOS REMOTOS ---------------------------
         html_foward = html_foward.replace('class="indented"','class="img-fluid"') # Adiciona a classe img-fluid ao html das imagens do output do FASTQC
-        html_foward = html_foward.replace('#M',f'#{sample}')
-        html_foward = html_foward.replace('id="M',f'id="{sample}')
-        html_reverse = html_reverse.replace('#M',f'#{sample}')
-        html_reverse = html_reverse.replace('id="M',f'id="{sample}')
+        html_foward = html_foward.replace('#M',f'#{sample}F')
+        html_foward = html_foward.replace('id="M',f'id="{sample}F')
+        html_reverse = html_reverse.replace('#M',f'#{sample}R')
+        html_reverse = html_reverse.replace('id="M',f'id="{sample}R')
 
         # Lê o arquivo com o BeautifulSoup
         soup_foward = BeautifulSoup(html_foward, 'html.parser')
@@ -213,7 +213,7 @@ def outputs(request):
         tsv_file_gene = io.StringIO(tsv_amr_gene)
         tsv_file_group = io.StringIO(tsv_amr_group)
         tsv_file_mechanism = io.StringIO(tsv_amr_mechanism)
-        tsv_file_type = io.StringIO(tsv_amr_type)
+        # tsv_file_type = io.StringIO(tsv_amr_type)
         
         # Ler o arquivo TSV usando o Pandas
         data_prokka = pd.read_csv(tsv_file_prokka, sep='\t')
@@ -221,14 +221,15 @@ def outputs(request):
         data_amr_gene = pd.read_csv(tsv_file_gene, sep='\t')
         data_amr_group = pd.read_csv(tsv_file_group, sep='\t')
         data_amr_mechanism = pd.read_csv(tsv_file_mechanism, sep='\t')
-        data_amr_type = pd.read_csv(tsv_file_type, sep='\t')
+        # data_amr_type = pd.read_csv(tsv_file_type, sep='\t')
         
         df_prokka = data_prokka.groupby('gene').size().reset_index(name='Count')
         df_amr_class = data_amr_class.sort_values(by=['Hits'] ,ascending= False)
         df_amr_gene = data_amr_gene.sort_values(by=['Hits'],ascending= False)
         df_amr_group = data_amr_group.sort_values(by=['Hits'] ,ascending= False)
         df_amr_mechanism = data_amr_mechanism.sort_values(by=['Hits'] ,ascending= False)
-        df_amr_type = data_amr_type.sort_values(by=['Hits'] ,ascending= False)
+        # df_amr_type = data_amr_type.sort_values(by=['Hits'] ,ascending= False)
+        
         # Processar os dados do arquivo para gerar o gráfico
         # Exemplo: contar o número de ocorrências de cada categoria
         # category_counts = df['gene'].value_counts().reset_index()
@@ -238,6 +239,7 @@ def outputs(request):
             x='Count',
             y='gene'
         )
+        
         # Exibir o gráfico
         html_prokka = chart_prokka.to_html()
         # html_prokka = altair_saver.save(chart_prokka, 'chart_prokka.png')
