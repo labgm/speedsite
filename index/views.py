@@ -6,6 +6,8 @@ from zipfile import ZipFile
 from .forms import UploadFileForm
 from .models import User, Project, Processament
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.conf import settings
 from bs4 import BeautifulSoup
 import pandas as pd
 import altair as alt
@@ -129,24 +131,61 @@ def outputs(request):
     data = {}
 
     for sample in samples:
-        # Caminho do arquivo HTML remoto
+        # Caminho dos arquivos remotos
         remote_fastqc_foward = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/fastqc/{sample}_1_fastqc.html'
         remote_fastqc_reverse = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/fastqc/{sample}_2_fastqc.html'
+        remote_icaro_path = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/metaquast/icarus_viewers/contig_size_viewer.html'
         remote_kraken_path = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/kraken/{sample}_report.html'
+        remote_prokka_path = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/prokka/{sample}.tsv'                                          
+        remote_amr_class = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/MEGARes/RunResistome/{sample}.class.tsv'                                          
+        remote_amr_gene = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/MEGARes/RunResistome/{sample}.gene.tsv'                                          
+        remote_amr_group = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/MEGARes/RunResistome/{sample}.group.tsv'                                          
+        remote_amr_mechanism = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/MEGARes/RunResistome/{sample}.mechanism.tsv'                                          
+        remote_amr_type = f'/storage1/victor/FILES_SPEEDYPIPE/USER{id}_PROJECT{id}/results/{sample}/MEGARes/RunResistome/{sample}.type.tsv'                                          
         
-        # list = ['chave1', 'valor1', 'chave2', 'valor2', 'chave3', 'valor3']
-
-        # dicionario = dict(zip(lista[::2], lista[1::2]))
-        # print(dicionario)                                             
-        
-        # Obtém o conteúdo do arquivo HTML Foward e Reverse
-        html_foward = sftp.open(remote_fastqc_foward, 'r')
-        html_reverse = sftp.open(remote_fastqc_reverse, 'r')
-        
-        # Faz a leitura do arquivo com decodificação UTF-8
-        html_foward = html_foward.read().decode('utf-8')
+        # OBTENÇÃO DOS DADOS REMOTOS  ---------------------------------------------
+        # -> HTML Foward e Reverse do FastQC
+        html_foward = sftp.open(remote_fastqc_foward, 'r') # Busca o arquivo do servidor remoto
+        html_reverse = sftp.open(remote_fastqc_reverse, 'r') 
+        html_foward = html_foward.read().decode('utf-8') # Lê o arquivo e decodifica usando UTF-8
         html_reverse = html_reverse.read().decode('utf-8')
 
+        # -> Report do Metaquast em HTML Ícarus
+        icarus_report = sftp.open(remote_icaro_path, 'r')
+        html_icarus_report = icarus_report.read().decode('utf-8')
+        
+        # -> Report do Kraken em HTML Krona
+        kraken_report = sftp.open(remote_kraken_path, 'r')
+        html_kraken_report = kraken_report.read().decode('utf-8')
+
+        # -> tsv do Prokka
+        prokka_report = sftp.open(remote_prokka_path, 'r')
+        tsv_prokka = prokka_report.read().decode('utf-8')
+        
+        # -> tsv do Megares Class
+        amr_class_report = sftp.open(remote_amr_class, 'r')
+        tsv_amr_class = amr_class_report.read().decode('utf-8')
+        
+        # -> tsv do Megares Class
+        amr_gene_report = sftp.open(remote_amr_gene, 'r')
+        tsv_amr_gene = amr_gene_report.read().decode('utf-8')
+        
+        # -> tsv do Megares Class
+        amr_group_report = sftp.open(remote_amr_group, 'r')
+        tsv_amr_group = amr_group_report.read().decode('utf-8')
+        
+        # -> tsv do Megares Mechanism
+        amr_mechanism_report = sftp.open(remote_amr_mechanism, 'r')
+        tsv_amr_mechanism = amr_mechanism_report.read().decode('utf-8')
+        
+        # -> tsv do Megares Class
+        amr_type_report = sftp.open(remote_amr_type, 'r')
+        tsv_amr_type = amr_type_report.read().decode('utf-8')
+
+        # -------------------------------------------------------------------------
+        
+        # PROCESSAMENTO E ORGANIZAÇÃO DOS DADOS REMOTOS ---------------------------
+        html_foward = html_foward.replace('class="indented"','class="img-fluid"') # Adiciona a classe img-fluid ao html das imagens do output do FASTQC
         html_foward = html_foward.replace('#M',f'#{sample}')
         html_foward = html_foward.replace('id="M',f'id="{sample}')
         html_reverse = html_reverse.replace('#M',f'#{sample}')
@@ -168,9 +207,116 @@ def outputs(request):
         conteudo_div_summary_foward = div_summary_foward.prettify()
         conteudo_div_summary_reverse = div_summary_reverse.prettify()
 
-        # Obtém o conteúdo do arquivo report do Kraken
-        kraken_report = sftp.open(remote_kraken_path, 'r')
-        html_kraken_report = kraken_report.read().decode('utf-8')
+        # Criar um objeto StringIO para ler o conteúdo como um arquivo
+        tsv_file_prokka = io.StringIO(tsv_prokka)
+        tsv_file_class = io.StringIO(tsv_amr_class)
+        tsv_file_gene = io.StringIO(tsv_amr_gene)
+        tsv_file_group = io.StringIO(tsv_amr_group)
+        tsv_file_mechanism = io.StringIO(tsv_amr_mechanism)
+        tsv_file_type = io.StringIO(tsv_amr_type)
+        
+        # Ler o arquivo TSV usando o Pandas
+        data_prokka = pd.read_csv(tsv_file_prokka, sep='\t')
+        data_amr_class = pd.read_csv(tsv_file_class, sep='\t')
+        data_amr_gene = pd.read_csv(tsv_file_gene, sep='\t')
+        data_amr_group = pd.read_csv(tsv_file_group, sep='\t')
+        data_amr_mechanism = pd.read_csv(tsv_file_mechanism, sep='\t')
+        data_amr_type = pd.read_csv(tsv_file_type, sep='\t')
+        
+        df_prokka = data_prokka.groupby('gene').size().reset_index(name='Count')
+        df_amr_class = data_amr_class.sort_values(by=['Hits'] ,ascending= False)
+        df_amr_gene = data_amr_gene.sort_values(by=['Hits'],ascending= False)
+        df_amr_group = data_amr_group.sort_values(by=['Hits'] ,ascending= False)
+        df_amr_mechanism = data_amr_mechanism.sort_values(by=['Hits'] ,ascending= False)
+        df_amr_type = data_amr_type.sort_values(by=['Hits'] ,ascending= False)
+        # Processar os dados do arquivo para gerar o gráfico
+        # Exemplo: contar o número de ocorrências de cada categoria
+        # category_counts = df['gene'].value_counts().reset_index()
+        
+        # Criar o gráfico de barras
+        chart_prokka = alt.Chart(df_prokka).mark_bar().encode(
+            x='Count',
+            y='gene'
+        )
+        # Exibir o gráfico
+        html_prokka = chart_prokka.to_html()
+        # html_prokka = altair_saver.save(chart_prokka, 'chart_prokka.png')
+        
+        source_amr_class = pd.DataFrame({
+            'Classes': df_amr_class['Class'],
+            'Hits': df_amr_class['Hits']
+        })
+        
+        chart_amr_class = alt.Chart(source_amr_class).mark_bar().encode(
+            x='Hits', 
+            y=alt.Y('Classes', type='nominal', sort=None)
+        )
+        html_class = chart_amr_class.to_html()
+        html_class = html_class.replace('vis',f'{sample}_class')
+        
+        # source_amr_gene = pd.DataFrame({
+        #     'Genes': df_amr_gene['Gene'].str.split('|', 4 , expand=True)[3],
+        #     'Hits': df_amr_gene['Hits']
+        # })
+
+        source_amr_gene = pd.DataFrame({
+            'Genes': df_amr_gene['Gene'].str.split('|', 4 , expand=True)[0],
+            'Type': df_amr_gene['Gene'].str.split('|', 4 , expand=True)[1],
+            'Class': df_amr_gene['Gene'].str.split('|', 4, expand=True)[2],
+            'Hits': df_amr_gene['Hits']
+        })
+
+        df = source_amr_gene.sort_values(by=['Type', 'Hits'], ascending=[True,False])
+        
+        def normalize(df):
+            result = df.copy()
+            max_value = df['Hits'].max()
+            min_value = df['Hits'].min()
+            result['Hits'] = (df['Hits'] - min_value) / (max_value - min_value)
+            return result
+
+        #Pegando os 14 últimos registros dos dados normalizados
+        df_last14 = df.tail(14)
+        source = pd.DataFrame({
+            'Classes': df_last14['Class'],
+            'Type': df_last14['Type'],
+            'Hits': df_last14['Hits']
+        })
+        source_new = normalize(source)
+
+        #Ajustar paleta de cores para ficar mais diferente
+        brush = alt.selection(type='single')
+        #source = source_new
+        #source_norm = source_norm.sort_values(['Type', 'Hits'], ascending=[True, False])
+        chart_amr_gene = alt.Chart(source_new).mark_bar().encode(
+            x=alt.X('sum(Hits):Q', stack='zero',  title='Normalized number of reads match'),
+            y=alt.Y('Classes:N', sort='-x'),
+            #color=alt.Color('Type:N')
+
+            color=alt.Color('Type:N',
+                sort = alt.EncodingSortField( 'order', order = 'ascending' ),
+                scale = alt.Scale(range= ['#FFC0CB','#DB7093', '#E6E6FA', '#800080', '#DC143C', '#FFD700','#FFFACD','#BDB76B','#32CD32','#006400','#008080']),
+                legend = alt.Legend(title="Type of Resistance")
+            ),
+
+            #,
+            #order=alt.Order(
+            # Sort the segments of the bars by this field
+            #  ['Hits'],
+            #  sort='ascending'
+            #)
+        ).configure_axis(
+            labelFontSize=10,
+            titleFontSize=12
+        )
+        chart_amr_gene.autosize='pad'
+
+        # chart_amr_gene = alt.Chart(source_amr_gene).mark_bar().encode(
+        #     y='Hits', 
+        #     x=alt.X('Genes', type='nominal', sort='-y')
+        # )
+        html_gene = chart_amr_gene.to_html()
+        html_gene = html_gene.replace('vis',f'{sample}_gene')
         
         # adiciona a informação ao dicionário
         data[sample] = {
@@ -178,10 +324,14 @@ def outputs(request):
             'conteudo_div_main_reverse': conteudo_div_main_reverse,
             'conteudo_div_summary_foward': conteudo_div_summary_foward,
             'conteudo_div_summary_reverse': conteudo_div_summary_reverse,
-            'html_kraken_report': html_kraken_report   
+            'html_kraken_report': html_kraken_report,
+            'html_prokka': html_prokka,
+            'html_icarus': html_icarus_report,
+            'html_amr_class': html_class, 
+            'html_amr_gene': html_gene,
         }
 
-    # print(data)
+    # print(data) 
 
 
     # Fecha a conexão SFTP
@@ -212,13 +362,30 @@ def outputs(request):
     return render(request, 'outputs.html', context)
     # return render(request, 'outputs.html', context)
 
-
-
 def processament(request):
     id = request.GET.get('id')
     if id:
         try:
             project = Processament.objects.get(project=id)
+            # import smtplib
+            # # set up the SMTP server
+            # s = smtplib.SMTP(host='mail.helptechsistemas.com.br', port=465)
+            # s.starttls()
+            # s.login('noreply-speedypipe4meta@helptechsistemas.com.br', '@Noreply1')
+
+            # # TESTE DE ENVIO DE E-MAIL
+            # assunto = 'TESTE'
+            # mensagem = 'Essa é uma mensagem de teste envio de e-mail do Speedypipe4meta'
+            # destinatario = 'victor.benedito12@hotmail.com'
+            
+            # # Enviando o e-mail
+            # send_mail(
+            #     assunto,
+            #     mensagem,
+            #     settings.DEFAULT_FROM_EMAIL,
+            #     [destinatario],
+            #     fail_silently=False,
+            # )
             return render(request, 'processament.html', {'id':id, 'project':project})
         except ObjectDoesNotExist:
             return render(request, 'processament.html', {'message': f'Projetc {id} not found!'})
